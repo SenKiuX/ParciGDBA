@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proyecto Ventas</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Gestión de Productos</h1>
+    <div id="app">
+        <section>
+            <h2>Agregar/Modificar Producto</h2>
+            <form id="productoForm">
+                <label for="productoId">ID Producto (dejar vacío para agregar):</label>
+                <input type="text" id="productoId">
+                <label for="nombre">Nombre:</label>
+                <input type="text" id="nombre" required>
+                <label for="precio">Precio:</label>
+                <input type="number" id="precio" step="0.01" required>
+                <label for="stock">Stock:</label>
+                <input type="number" id="stock" required>
+                <button type="submit">Guardar Producto</button>
+            </form>
+        </section>
+        <section>
+            <h2>Productos</h2>
+            <ul id="productos"></ul>
+        </section>
+        <section>
+            <h2>Generar Factura</h2>
+            <form id="facturaForm">
+                <label for="producto_id">ID Producto:</label>
+                <input type="text" id="producto_id" required>
+                <label for="cantidad">Cantidad:</label>
+                <input type="number" id="cantidad" required>
+                <button type="submit">Generar Factura</button>
+            </form>
+        </section>
+        <section>
+            <h2>Reporte de Ventas</h2>
+            <button id="descargarReporte">Descargar Reporte</button>
+        </section>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
