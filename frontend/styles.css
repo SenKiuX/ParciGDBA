@@ -1,37 +1,126 @@
 body {
     font-family: Arial, sans-serif;
     margin: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #010104; /* Cambia el color de fondo aquí */
 }
-h1, h2 {
+
+#app {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 80%;
+    max-width: 800px;
+}
+
+h1 {
     color: #333;
+    text-align: center;
+    font-size: 2em;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    animation: titleAnimation 2s infinite;
 }
+
+h2 {
+    color: #333;
+    text-align: center;
+    font-size: 1.5em;
+    margin-bottom: 10px;
+    animation: titleAnimation 2s infinite;
+}
+
 ul {
     list-style-type: none;
     padding: 0;
 }
+
 li {
     background: #f4f4f4;
     margin: 5px 0;
     padding: 10px;
     border: 1px solid #ddd;
 }
+
 form {
     margin-bottom: 20px;
 }
+
 label {
     display: block;
     margin: 10px 0 5px;
 }
+
 input, button {
     padding: 8px;
     margin-bottom: 10px;
 }
+
 button {
-    background: #28a745;
+    background: #007bff;
     color: white;
     border: none;
     cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
 }
+
 button:hover {
-    background: #218838;
+    background: #24b300;
+    animation: pulse 0.6s infinite, textColorChange 1.5s infinite;
+    transform: scale(1.05);
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes textColorChange {
+    0% {
+        color: white;
+    }
+    50% {
+        color: yellow;
+    }
+    100% {
+        color: white;
+    }
+}
+
+@keyframes titleAnimation {
+    0% {
+        color: #333;
+    }
+    50% {
+        color: #b0da3a;
+    }
+    100% {
+        color: #333;
+    }
+}
+
+/* Nueva regla para cambiar el fondo de la sección de Agregar/Modificar Producto */
+#productoForm {
+    background-color: #e0f7fa; /* Cambia el color de fondo aquí */
+    padding: 20px;
+    border-radius: 8px;
+}
+
+/* Nueva regla para cambiar el fondo de la sección de Generar Factura */
+#facturaForm {
+    background-color: #bbeedd; /* Cambia el color de fondo aquí */
+    padding: 20px;
+    border-radius: 8px;
 }
