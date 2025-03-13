@@ -142,7 +142,7 @@ window.eliminarProducto = async (id) => {
 
 // Función genérica para hacer solicitudes fetch y obtener JSON
 const fetchData = async (url, options = {}) => {
-    const response = await fetch(`http://localhost:3000${url}`, {
+    const response = await fetch(url, {
         headers: { 'Content-Type': 'application/json' },
         ...options
     });
@@ -156,7 +156,7 @@ const fetchData = async (url, options = {}) => {
 
 // Función genérica para hacer solicitudes fetch y obtener un blob
 const fetchBlob = async (url) => {
-    const response = await fetch(`http://localhost:3000${url}`);
+    const response = await fetch(url);
 
     if (!response.ok) {
         throw new Error('Error en la solicitud');
@@ -172,4 +172,14 @@ const descargarArchivo = (blob, filename) => {
     a.download = filename;
     a.click();
     window.URL.revokeObjectURL(url);
+};
+
+// Example usage
+const loadProducts = async () => {
+    try {
+        const products = await fetchData('/api/productos');
+        // ...handle products...
+    } catch (error) {
+        alert(`Error al cargar productos: ${error.message}`);
+    }
 };
