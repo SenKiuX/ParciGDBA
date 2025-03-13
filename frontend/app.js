@@ -4,10 +4,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const facturaForm = document.getElementById('facturaForm');
     const descargarReporteBtn = document.getElementById('descargarReporte');
 
-    // Cargar productos
-    const cargarProductos = async () => {
-        const response = await fetch('http://localhost:5000/api/productos');
-        const productos = await response.json();
+    // Cargar productos al iniciar
+    cargarProductos();
+
+    // Escuchar eventos
+    productoForm.addEventListener('submit', manejarProductoForm);
+    facturaForm.addEventListener('submit', manejarFacturaForm);
+    descargarReporteBtn.addEventListener('click', descargarReporte);
+});
+
+// Función para cargar productos
+const cargarProductos = async () => {
+    try {
+        const productos = await fetchData('/api/productos');
         productosList.innerHTML = productos.map(p => `
             <li>
                 ${p.nombre} - $${p.precio} (Stock: ${p.stock})
@@ -15,106 +24,134 @@ document.addEventListener('DOMContentLoaded', () => {
                 <button onclick="eliminarProducto('${p.id}')">Eliminar</button>
             </li>
         `).join('');
-    };
+    } catch (error) {
+        console.error('Error al cargar productos:', error);
+        alert('Error al cargar productos');
+    }
+};
 
-    // Agregar o modificar producto
-    productoForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const id = document.getElementById('productoId').value;
-        const nombre = document.getElementById('nombre').value;
-        const precio = document.getElementById('precio').value;
-        const stock = document.getElementById('stock').value;
+// Función para manejar el formulario de productos
+const manejarProductoForm = async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('productoId').value;
+    const nombre = document.getElementById('nombre').value;
+    const precio = document.getElementById('precio').value;
+    const stock = document.getElementById('stock').value;
 
-        const url = id ? `http://localhost:5000/api/productos/${id}` : 'http://localhost:5000/api/productos';
-        const method = id ? 'PUT' : 'POST';
+    const url = id ? `/api/productos/${id}` : '/api/productos';
+    const method = id ? 'PUT' : 'POST';
 
-        const response = await fetch(url, {
+    try {
+        await fetchData(url, {
             method,
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ nombre, precio, stock })
         });
+        alert('Producto guardado exitosamente');
+        cargarProductos();
+        productoForm.reset();
+    } catch (error) {
+        console.error('Error al guardar el producto:', error);
+        alert('Error al guardar el producto');
+    }
+};
 
-        if (response.ok) {
-            alert('Producto guardado exitosamente');
-            cargarProductos();
-            productoForm.reset();
-        } else {
-            alert('Error al guardar el producto');
-        }
-    });
+// Función para manejar el formulario de factura
+const manejarFacturaForm = async (e) => {
+    e.preventDefault();
+    const producto_id = document.getElementById('producto_id').value;
+    const cantidad = document.getElementById('cantidad').value;
 
-    // Editar producto
-    window.editarProducto = async (id) => {
-        const response = await fetch(`http://localhost:5000/api/productos/${id}`);
-        const producto = await response.json();
+    try {
+        const venta = await fetchData('/api/factura', {
+            method: 'POST',
+            body: JSON.stringify({ producto_id, cantidad })
+        });
+        alert('Venta registrada y stock actualizado');
+        cargarProductos();
+        descargarFacturaPdf(venta.id);
+    } catch (error) {
+        console.error('Error al generar la factura:', error);
+        alert(`Error al generar la factura: ${error.error}`);
+    }
+};
+
+// Función para descargar el reporte de ventas
+const descargarReporte = async () => {
+    try {
+        const blob = await fetchBlob('/api/reporte-ventas');
+        descargarArchivo(blob, 'ventas.xlsx');
+    } catch (error) {
+        console.error('Error al descargar el reporte:', error);
+        alert('Error al descargar el reporte');
+    }
+};
+
+// Función para descargar la factura en PDF
+const descargarFacturaPdf = async (venta_id) => {
+    try {
+        const blob = await fetchBlob(`/api/factura-pdf/${venta_id}`);
+        descargarArchivo(blob, `factura_${venta_id}.pdf`);
+    } catch (error) {
+        console.error('Error al descargar la factura:', error);
+        alert('Error al descargar la factura');
+    }
+};
+
+// Función para editar producto
+window.editarProducto = async (id) => {
+    try {
+        const producto = await fetchData(`/api/productos/${id}`);
         document.getElementById('productoId').value = producto.id;
         document.getElementById('nombre').value = producto.nombre;
         document.getElementById('precio').value = producto.precio;
         document.getElementById('stock').value = producto.stock;
-    };
+    } catch (error) {
+        console.error('Error al cargar el producto:', error);
+        alert('Error al cargar el producto');
+    }
+};
 
-    // Eliminar producto
-    window.eliminarProducto = async (id) => {
-        if (confirm('¿Estás seguro de eliminar este producto?')) {
-            const response = await fetch(`http://localhost:5000/api/productos/${id}`, {
-                method: 'DELETE'
-            });
-            if (response.ok) {
-                alert('Producto eliminado exitosamente');
-                cargarProductos();
-            } else {
-                alert('Error al eliminar el producto');
-            }
-        }
-    };
-
-    // Generar factura
-    facturaForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const producto_id = document.getElementById('producto_id').value;
-        const cantidad = document.getElementById('cantidad').value;
-
-        console.log('Datos enviados:', { producto_id, cantidad }); // Depuración
-
-        const response = await fetch('http://localhost:5000/api/factura', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ producto_id, cantidad })
-        });
-
-        if (response.ok) {
-            const venta = await response.json();
-            alert('Venta registrada y stock actualizado');
+// Función para eliminar producto
+window.eliminarProducto = async (id) => {
+    if (confirm('¿Estás seguro de eliminar este producto?')) {
+        try {
+            await fetchData(`/api/productos/${id}`, { method: 'DELETE' });
+            alert('Producto eliminado exitosamente');
             cargarProductos();
-            descargarFacturaPdf(venta.id); // Descargar la factura en PDF
-        } else {
-            const error = await response.json();
-            console.error('Error del backend:', error); // Depuración
-            alert(`Error al generar la factura: ${error.error}`);
+        } catch (error) {
+            console.error('Error al eliminar el producto:', error);
+            alert('Error al eliminar el producto');
         }
+    }
+};
+
+// Función genérica para hacer solicitudes fetch y obtener JSON
+const fetchData = async (url, options = {}) => {
+    const response = await fetch(`http://localhost:5000${url}`, {
+        headers: { 'Content-Type': 'application/json' },
+        ...options
     });
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Error en la solicitud');
+    }
+    return response.json();
+};
 
-    // Descargar reporte
-    descargarReporteBtn.addEventListener('click', async () => {
-        const response = await fetch('http://localhost:5000/api/reporte-ventas');
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'ventas.xlsx';
-        a.click();
-    });
+// Función genérica para hacer solicitudes fetch y obtener un blob
+const fetchBlob = async (url) => {
+    const response = await fetch(`http://localhost:5000${url}`);
+    if (!response.ok) {
+        throw new Error('Error en la solicitud');
+    }
+    return response.blob();
+};
 
-    // Función para descargar la factura en PDF
-    const descargarFacturaPdf = async (venta_id) => {
-        const response = await fetch(`http://localhost:5000/api/factura-pdf/${venta_id}`);
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `factura_${venta_id}.pdf`;
-        a.click();
-    };
-
-    cargarProductos(); // Cargar productos al iniciar
-});
+// Función para descargar archivos
+const descargarArchivo = (blob, filename) => {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+};

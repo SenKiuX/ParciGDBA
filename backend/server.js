@@ -4,10 +4,14 @@ const cors = require('cors');
 const { Client } = require('pg');
 const ExcelJS = require('exceljs');
 const PdfPrinter = require('pdfmake');
+const path = require('path');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// Servir archivos estáticos desde la carpeta "frontend"
+app.use(express.static(path.join(__dirname, '../frontend')));
 
 console.log('URL de la base de datos:', process.env.DATABASE_URL);
 
@@ -28,7 +32,7 @@ client.connect()
 
 // Ruta para la raíz
 app.get('/', (req, res) => {
-    res.send('Bienvenido al backend del proyecto de ventas');
+    res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
 
 // Operaciones CRUD para productos
@@ -167,7 +171,7 @@ app.get('/api/factura-pdf/:venta_id', async (req, res) => {
             { text: '\nDetalles de la Venta:', style: 'subheader' },
             {
                 table: {
-                    widths: ['*', '*', '*', '*'],
+                    widths: ['', '', '', ''],
                     body: [
                         ['Producto ID', 'Nombre del Producto', 'Cantidad', 'Precio Unitario'],
                         [venta.producto_id, venta.producto_nombre, venta.cantidad, `$${venta.precio}`]
@@ -209,6 +213,11 @@ app.get('/api/factura-pdf/:venta_id', async (req, res) => {
     // Enviar el PDF
     pdfDoc.pipe(res);
     pdfDoc.end();
+});
+
+// Manejar rutas no encontradas
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
 
 const PORT = process.env.PORT || 5000;
