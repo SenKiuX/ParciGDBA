@@ -17,16 +17,31 @@ document.addEventListener('DOMContentLoaded', () => {
 const cargarProductos = async () => {
     try {
         const productos = await fetchData('/api/productos');
-        productosList.innerHTML = productos.map(p => `
-            <li>
-                ${p.nombre} - $${p.precio} (Stock: ${p.stock})
-                <button onclick="editarProducto('${p.id}')">Editar</button>
-                <button onclick="eliminarProducto('${p.id}')">Eliminar</button>
-            </li>
-        `).join('');
+        const productosList = document.getElementById('productos');
+
+        if (!productosList) {
+            throw new Error('El elemento productosList no fue encontrado en el DOM');
+        }
+
+        // Limpia la lista antes de agregar nuevos elementos
+        productosList.innerHTML = '';
+
+        // Recorre los productos y crea elementos <li> para cada uno
+        productos.forEach(producto => {
+            const precio = parseFloat(producto.precio); // Convierte el precio a número
+            const stock = parseInt(producto.stock, 10); // Convierte el stock a número
+
+            const li = document.createElement('li');
+            li.innerHTML = `
+                ${producto.nombre} - $${precio.toFixed(2)} (Stock: ${stock})
+                <button onclick="editarProducto('${producto.id}')">Editar</button>
+                <button onclick="eliminarProducto('${producto.id}')">Eliminar</button>
+            `;
+            productosList.appendChild(li);
+        });
     } catch (error) {
         console.error('Error al cargar productos:', error);
-        alert('Error al cargar productos');
+        alert('Error al cargar productos: ' + error.message);
     }
 };
 
@@ -58,7 +73,7 @@ const manejarProductoForm = async (e) => {
 // Función para manejar el formulario de factura
 const manejarFacturaForm = async (e) => {
     e.preventDefault();
-    const producto_id = document.getElementById('producto_id').value;
+    const producto_id = document.getElementById('producto_id').value; // Corrige el ID del campo
     const cantidad = document.getElementById('cantidad').value;
 
     try {
@@ -71,7 +86,7 @@ const manejarFacturaForm = async (e) => {
         descargarFacturaPdf(venta.id);
     } catch (error) {
         console.error('Error al generar la factura:', error);
-        alert(`Error al generar la factura: ${error.error}`);
+        alert(`Error al generar la factura: ${error.message}`);
     }
 };
 
@@ -127,10 +142,11 @@ window.eliminarProducto = async (id) => {
 
 // Función genérica para hacer solicitudes fetch y obtener JSON
 const fetchData = async (url, options = {}) => {
-    const response = await fetch(`http://localhost:5000${url}`, {
+    const response = await fetch(`http://localhost:3000${url}`, {
         headers: { 'Content-Type': 'application/json' },
         ...options
     });
+
     if (!response.ok) {
         const error = await response.json();
         throw new Error(error.error || 'Error en la solicitud');
@@ -140,7 +156,8 @@ const fetchData = async (url, options = {}) => {
 
 // Función genérica para hacer solicitudes fetch y obtener un blob
 const fetchBlob = async (url) => {
-    const response = await fetch(`http://localhost:5000${url}`);
+    const response = await fetch(`http://localhost:3000${url}`);
+
     if (!response.ok) {
         throw new Error('Error en la solicitud');
     }
@@ -154,4 +171,5 @@ const descargarArchivo = (blob, filename) => {
     a.href = url;
     a.download = filename;
     a.click();
+    window.URL.revokeObjectURL(url);
 };
