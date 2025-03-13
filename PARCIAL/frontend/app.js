@@ -1,4 +1,4 @@
-const backendUrl = 'http://localhost:10000'; // URL del backend en Render
+const backendUrl = 'https://parcigdba.onrender.com'; // Reemplaza con la URL correcta de tu backend en Render
 
 document.addEventListener('DOMContentLoaded', () => {
     const productosList = document.getElementById('productos');
