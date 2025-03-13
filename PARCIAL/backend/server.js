@@ -12,7 +12,11 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors({
-  origin: 'https://parci-gdba-g2t2-h0phrwhpu-senkiuxs-projects.vercel.app' // Reemplaza con tu dominio de Vercel
+  origin: [
+    'https://parci-gdba-g2t2.vercel.app',
+    'https://parci-gdba-g2t2-git-main-senkiuxs-projects.vercel.app',
+    'https://parci-gdba-g2t2-13hp7ebnw-senkiuxs-projects.vercel.app'
+  ]
 }));
 app.use(express.json());
 

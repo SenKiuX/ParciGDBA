@@ -1,5 +1,38 @@
 const backendUrl = 'https://parcigdba.onrender.com'; // Reemplaza con la URL correcta de tu backend en Render
 
+const fetchData = async (endpoint, options = {}) => {
+    const response = await fetch(`${backendUrl}${endpoint}`, {
+        headers: { 'Content-Type': 'application/json' },
+        ...options
+    });
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Error en la solicitud');
+    }
+    return response.json();
+};
+
+const fetchBlob = async (endpoint) => {
+    const response = await fetch(`${backendUrl}${endpoint}`);
+
+    if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Error en la solicitud');
+    }
+    return response.blob();
+};
+
+// Example usage
+const loadProducts = async () => {
+    try {
+        const products = await fetchData('/api/productos');
+        // ...handle products...
+    } catch (error) {
+        alert(`Error al cargar productos: ${error.message}`);
+    }
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     const productosList = document.getElementById('productos');
     const productoForm = document.getElementById('productoForm');
@@ -142,31 +175,6 @@ window.eliminarProducto = async (id) => {
     }
 };
 
-// Función genérica para hacer solicitudes fetch y obtener JSON
-const fetchData = async (endpoint, options = {}) => {
-    const response = await fetch(`${backendUrl}${endpoint}`, {
-        headers: { 'Content-Type': 'application/json' },
-        ...options
-    });
-
-    if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || 'Error en la solicitud');
-    }
-    return response.json();
-};
-
-// Función genérica para hacer solicitudes fetch y obtener un blob
-const fetchBlob = async (endpoint) => {
-    const response = await fetch(`${backendUrl}${endpoint}`);
-
-    if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || 'Error en la solicitud');
-    }
-    return response.blob();
-};
-
 // Función para descargar archivos
 const descargarArchivo = (blob, filename) => {
     const url = window.URL.createObjectURL(blob);
@@ -175,14 +183,4 @@ const descargarArchivo = (blob, filename) => {
     a.download = filename;
     a.click();
     window.URL.revokeObjectURL(url);
-};
-
-// Example usage
-const loadProducts = async () => {
-    try {
-        const products = await fetchData('/api/productos');
-        // ...handle products...
-    } catch (error) {
-        alert(`Error al cargar productos: ${error.message}`);
-    }
 };
