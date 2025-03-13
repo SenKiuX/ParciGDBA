@@ -1,3 +1,5 @@
+const backendUrl = 'http://localhost:10000'; // URL del backend en Render
+
 document.addEventListener('DOMContentLoaded', () => {
     const productosList = document.getElementById('productos');
     const productoForm = document.getElementById('productoForm');
@@ -141,25 +143,26 @@ window.eliminarProducto = async (id) => {
 };
 
 // Función genérica para hacer solicitudes fetch y obtener JSON
-const fetchData = async (url, options = {}) => {
-    const response = await fetch(url, {
+const fetchData = async (endpoint, options = {}) => {
+    const response = await fetch(`${backendUrl}${endpoint}`, {
         headers: { 'Content-Type': 'application/json' },
         ...options
     });
 
     if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Error en la solicitud');
+        const errorText = await response.text();
+        throw new Error(errorText || 'Error en la solicitud');
     }
     return response.json();
 };
 
 // Función genérica para hacer solicitudes fetch y obtener un blob
-const fetchBlob = async (url) => {
-    const response = await fetch(url);
+const fetchBlob = async (endpoint) => {
+    const response = await fetch(`${backendUrl}${endpoint}`);
 
     if (!response.ok) {
-        throw new Error('Error en la solicitud');
+        const errorText = await response.text();
+        throw new Error(errorText || 'Error en la solicitud');
     }
     return response.blob();
 };
