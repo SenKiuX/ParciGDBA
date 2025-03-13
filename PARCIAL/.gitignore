@@ -1,0 +1,12 @@
+# Ignorar node_modules
+node_modules/
+
+# Ignorar archivos de entorno
+.env
+backend/env/
+
+# Ignorar archivos de configuración local
+*.local
+
+# Ignorar archivos de VSCode
+.vscode/
